@@ -1,4 +1,4 @@
-import { read, readFile, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 class TrieNode {
     children: Map<string, TrieNode>;

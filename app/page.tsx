@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const BLUE_HIGHLIGHT = "";
-
 const word = "BEATSORBITAROMAROVERDRESS";
 const rowHints = [
   "Rhythmic pulses in music",
@@ -44,6 +42,10 @@ export default function Crossword() {
         }
       };
 
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Backspace"].includes(e.key)) {
+        e.preventDefault();
+      }
+
       if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
         const newGrid = grid.map((r) => r.map((cell) => ({ ...cell })));
         newGrid[row][col].letter = e.key.toUpperCase();
@@ -66,8 +68,20 @@ export default function Crossword() {
 
   return (
     <div className="flex justify-center items-center h-screen w-screen">
-      <div className="flex justify-center items-center h-screen gap-8">
-        <div className="grid w-[90vmin] h-[90vmin]"
+      <div className="absolute top-4 right-4">
+      <button
+        className="px-3 py-1 text-sm font-medium border rounded bg-white text-black dark:bg-black dark:text-white dark:border-white border-black transition"
+        onClick={() => {
+          const html = document.documentElement;
+          html.classList.toggle("dark");
+        }}
+      >
+        Toggle Theme
+      </button>
+    </div>
+      <div className="flex flex-row gap-8 items-center">
+        <div
+          className="grid w-[90vmin] h-[90vmin]"
           style={{
             gridTemplateColumns: `repeat(${size}, 1fr)`,
             gridTemplateRows: `repeat(${size}, 1fr)`,
@@ -82,9 +96,9 @@ export default function Crossword() {
                 direction === "row" ? r === activeRow : c === activeCol;
               const showNumber = r == 0 || c == 0;
 
-              let bgColor = "#fff";
-              if (isActive) bgColor = "#ffcc66"; // orange/yellow
-              else if (isHighlight) bgColor = "#b3d7ff"; // light blue
+              let background = "var(--cell-bg)";
+              if (isActive) background = "var(--cell-active)";
+              else if (isHighlight) background = "var(--cell-highlight)";
 
               return (
                 <div
@@ -96,15 +110,15 @@ export default function Crossword() {
                       setActive([r, c]);
                     }
                   }}
-                  className="flex relative justify-center, items-center"
+                  className="flex relative justify-center items-center"
                   style={{
-                    backgroundColor: bgColor,
-                    border: "2px solid #aaa",
+                    backgroundColor: background,
+                    border: "2px solid var(--cell-border)",
                     fontSize: "8vmin",
                     fontWeight: "bold",
                     userSelect: "none",
                     aspectRatio: "1",
-                    color: "#000", // always render letters in black
+                    color: "var(--cell-text)",
                   }}
                 >
                   {showNumber && (
@@ -113,7 +127,7 @@ export default function Crossword() {
                         position: "absolute",
                         fontSize: "25px",
                         top: "2px",
-                        left: "4px"
+                        left: "4px",
                       }}
                     >
                       {r == 0 ? c + 1 : r + 1}
@@ -125,7 +139,8 @@ export default function Crossword() {
             })
           )}
         </div>
-        <div className="flex flex-col max-w-[20vw] text-sm leading-relaxed overflow-y-auto">
+
+        <div className="flex flex-col text-sm leading-relaxed max-h-[90vmin] overflow-y-auto">
           <div className="font-bold mb-2">Across</div>
           {rowHints.map((hint, i) => (
             <div key={i}>{`${i + 1}. ${hint}`}</div>

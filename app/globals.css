@@ -1,26 +1,31 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Light mode defaults */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cell-bg: #eeeeee;
+  --cell-active: #ffcc66;
+  --cell-highlight: #b3d7ff;
+  --cell-border: #aaaaaa;
+  --cell-text: #000000;
+  --bg: #ffffff;
+  --fg: #000000;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark mode overrides */
+.dark {
+  --cell-bg: #0e0e0e;
+  --cell-active: #ffbb33;
+  --cell-highlight: #224466;
+  --cell-border: #444444;
+  --cell-text: #ffffff;
+  --bg: #000000;
+  --fg: #ffffff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
