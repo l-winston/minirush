@@ -1,63 +1,129 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const word = "AWARDTHREELOOSEARMEDSEATS";
+const word = "BEATSORBITAROMAROVERDRESS";
+const rowHints = [
+  "Rhythmic pulses in music",
+  "Path of a planet around the sun",
+  "Pleasant smell",
+  "Mars explorer",
+  "One-piece outfit",
+];
+const colHints = [
+  "Flat surface or a group of directors",
+  "Mistake or bug",
+  "Higher than",
+  "Multiplies, or a newspaper",
+  "Night sky lights or celebrities",
+];
 const size = 5;
 
-export default function Home() {
-  // Initialize grid as a 2D array of characters
-  const initialGrid = Array.from({ length: size }, (_, row) =>
-    word.slice(row * size, (row + 1) * size).split("")
-  );
+type Cell = {
+  letter: string;
+};
 
+const initialGrid: Cell[][] = Array.from({ length: size }, () =>
+  Array.from({ length: size }, () => ({ letter: "" }))
+);
+
+export default function Crossword() {
   const [grid, setGrid] = useState(initialGrid);
+  const [active, setActive] = useState<[number, number]>([0, 0]);
+  const [direction, setDirection] = useState<"row" | "col">("row");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle typing into a cell
-  const handleChange = (row: number, col: number, value: string) => {
-    if (value.length > 1) return; // limit to one char
-    const newGrid = [...grid.map(row => [...row])]; // deep clone
-    newGrid[row][col] = value.toUpperCase(); // keep uppercase
-    setGrid(newGrid);
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const [row, col] = active;
+
+      const move = (r: number, c: number) => {
+        if (r >= 0 && r < size && c >= 0 && c < size) {
+          setActive([r, c]);
+        }
+      };
+
+      if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
+        const newGrid = grid.map((r) => r.map((cell) => ({ ...cell })));
+        newGrid[row][col].letter = e.key.toUpperCase();
+        setGrid(newGrid);
+        direction === "row" ? move(row, col + 1) : move(row + 1, col);
+      } else if (e.key === "Backspace") {
+        const newGrid = grid.map((r) => r.map((cell) => ({ ...cell })));
+        newGrid[row][col].letter = "";
+        setGrid(newGrid);
+        direction === "row" ? move(row, col - 1) : move(row - 1, col);
+      } else if (e.key === "ArrowUp") move(row - 1, col);
+      else if (e.key === "ArrowDown") move(row + 1, col);
+      else if (e.key === "ArrowLeft") move(row, col - 1);
+      else if (e.key === "ArrowRight") move(row, col + 1);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [active, grid, direction]);
 
   return (
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${size}, 1fr)`,
-        gridTemplateRows: `repeat(${size}, 1fr)`,
-        width: "90vmin",
-        height: "90vmin",
-        maxWidth: "90vw",
-        maxHeight: "90vh",
-        margin: "auto",
-        gap: "0.5vmin",
-        padding: "1vmin",
-        boxSizing: "border-box",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100vw",
       }}
     >
-      {grid.map((row, rowIndex) =>
-        row.map((char, colIndex) => (
-          <input
-            key={`${rowIndex}-${colIndex}`}
-            value={char}
-            onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
-            maxLength={1}
-            style={{
-              textAlign: "center",
-              textTransform: "uppercase",
-              fontWeight: "bold",
-              fontSize: "5vmin",
-              fontFamily: "Arial, sans-serif",
-              backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              aspectRatio: "1 / 1",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        ))
-      )}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${size}, 1fr)`,
+          gridTemplateRows: `repeat(${size}, 1fr)`,
+          width: "90vmin",
+          height: "90vmin",
+          gap: "1px",
+        }}
+        onClick={() => inputRef.current?.focus()}
+      >
+        {grid.map((row, r) =>
+          row.map((cell, c) => {
+            const [activeRow, activeCol] = active;
+            const isActive = r === activeRow && c === activeCol;
+            const isHighlight =
+              direction === "row" ? r === activeRow : c === activeCol;
+
+            let bgColor = "#fff";
+            if (isActive) bgColor = "#ffcc66"; // orange/yellow
+            else if (isHighlight) bgColor = "#e6f2ff"; // light blue
+
+            return (
+              <div
+                key={`${r}-${c}`}
+                onClick={() => {
+                  if (isActive) {
+                    setDirection((prev) => (prev === "row" ? "col" : "row"));
+                  } else {
+                    setActive([r, c]);
+                  }
+                }}
+                style={{
+                  backgroundColor: bgColor,
+                  border: "1px solid #aaa",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "4vmin",
+                  fontWeight: "bold",
+                  userSelect: "none",
+                  aspectRatio: "1",
+                  color: "#000", // always render letters in black
+                }}
+              >
+                {cell.letter}
+              </div>
+            );
+          })
+        )}
+      </div>
+      <input ref={inputRef} style={{ position: "absolute", opacity: 0 }} />
     </div>
   );
 }
