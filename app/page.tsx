@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
+const BLUE_HIGHLIGHT = "";
+
 const word = "BEATSORBITAROMAROVERDRESS";
 const rowHints = [
   "Rhythmic pulses in music",
@@ -63,65 +65,77 @@ export default function Crossword() {
   }, [active, grid, direction]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        width: "100vw",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${size}, 1fr)`,
-          gridTemplateRows: `repeat(${size}, 1fr)`,
-          width: "90vmin",
-          height: "90vmin",
-          gap: "1px",
-        }}
-        onClick={() => inputRef.current?.focus()}
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => {
-            const [activeRow, activeCol] = active;
-            const isActive = r === activeRow && c === activeCol;
-            const isHighlight =
-              direction === "row" ? r === activeRow : c === activeCol;
+    <div className="flex justify-center items-center h-screen w-screen">
+      <div className="flex justify-center items-center h-screen gap-8">
+        <div className="grid w-[90vmin] h-[90vmin]"
+          style={{
+            gridTemplateColumns: `repeat(${size}, 1fr)`,
+            gridTemplateRows: `repeat(${size}, 1fr)`,
+          }}
+          onClick={() => inputRef.current?.focus()}
+        >
+          {grid.map((row, r) =>
+            row.map((cell, c) => {
+              const [activeRow, activeCol] = active;
+              const isActive = r === activeRow && c === activeCol;
+              const isHighlight =
+                direction === "row" ? r === activeRow : c === activeCol;
+              const showNumber = r == 0 || c == 0;
 
-            let bgColor = "#fff";
-            if (isActive) bgColor = "#ffcc66"; // orange/yellow
-            else if (isHighlight) bgColor = "#e6f2ff"; // light blue
+              let bgColor = "#fff";
+              if (isActive) bgColor = "#ffcc66"; // orange/yellow
+              else if (isHighlight) bgColor = "#b3d7ff"; // light blue
 
-            return (
-              <div
-                key={`${r}-${c}`}
-                onClick={() => {
-                  if (isActive) {
-                    setDirection((prev) => (prev === "row" ? "col" : "row"));
-                  } else {
-                    setActive([r, c]);
-                  }
-                }}
-                style={{
-                  backgroundColor: bgColor,
-                  border: "1px solid #aaa",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: "4vmin",
-                  fontWeight: "bold",
-                  userSelect: "none",
-                  aspectRatio: "1",
-                  color: "#000", // always render letters in black
-                }}
-              >
-                {cell.letter}
-              </div>
-            );
-          })
-        )}
+              return (
+                <div
+                  key={`${r}-${c}`}
+                  onClick={() => {
+                    if (isActive) {
+                      setDirection((prev) => (prev === "row" ? "col" : "row"));
+                    } else {
+                      setActive([r, c]);
+                    }
+                  }}
+                  className="flex relative justify-center, items-center"
+                  style={{
+                    backgroundColor: bgColor,
+                    border: "2px solid #aaa",
+                    fontSize: "8vmin",
+                    fontWeight: "bold",
+                    userSelect: "none",
+                    aspectRatio: "1",
+                    color: "#000", // always render letters in black
+                  }}
+                >
+                  {showNumber && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        fontSize: "25px",
+                        top: "2px",
+                        left: "4px"
+                      }}
+                    >
+                      {r == 0 ? c + 1 : r + 1}
+                    </div>
+                  )}
+                  {cell.letter}
+                </div>
+              );
+            })
+          )}
+        </div>
+        <div className="flex flex-col max-w-[20vw] text-sm leading-relaxed overflow-y-auto">
+          <div className="font-bold mb-2">Across</div>
+          {rowHints.map((hint, i) => (
+            <div key={i}>{`${i + 1}. ${hint}`}</div>
+          ))}
+
+          <div className="font-bold mt-4 mb-2">Down</div>
+          {colHints.map((hint, i) => (
+            <div key={i}>{`${i + 1}. ${hint}`}</div>
+          ))}
+        </div>
       </div>
       <input ref={inputRef} style={{ position: "absolute", opacity: 0 }} />
     </div>
