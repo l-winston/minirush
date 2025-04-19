@@ -4,12 +4,12 @@
 
 /* Light mode defaults */
 :root {
-  --cell-bg: #eeeeee;
+  --cell-bg: #ffffff;
   --cell-active: #ffcc66;
   --cell-highlight: #b3d7ff;
   --cell-border: #aaaaaa;
   --cell-text: #000000;
-  --bg: #ffffff;
+  --bg: #eeeeee;
   --fg: #000000;
 }
 
